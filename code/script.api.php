@@ -128,6 +128,131 @@ class Com_ApiInstallerScript
 	function update($parent)
 	{
 		$this->componentStatus = "update";
+		// From 1.6.1
+		$this->fix_db_on_update();
+	}
+	
+	//Since API version 1.6.1
+	function fix_db_on_update()
+	{
+
+		$db = JFactory::getDBO();
+		$config = JFactory::getConfig();
+
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'state'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			echo $query="ALTER TABLE  `#__api_keys` ADD  `state` tinyint(1)	 NOT NULL";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'checked_out'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `checked_out` int(11)	 NOT NULL  AFTER  `state`";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'checked_out_time'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `checked_out_time` datetime	 NOT NULL DEFAULT '0000-00-00 00:00:00'  AFTER  `checked_out`";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'created'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `created` datetime	 NOT NULL  AFTER  `checked_out_time`";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'created'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `created` datetime	 NOT NULL DEFAULT '0000-00-00 00:00:00'  AFTER  `checked_out_time`";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'user_id'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if($check)
+		{
+			$query="ALTER TABLE `#__api_keys` CHANGE `user_id` `userid` INT(11)";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'last_used'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `last_used` datetime	 NOT NULL DEFAULT '0000-00-00 00:00:00' ";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+
+		$query="SHOW COLUMNS FROM #__api_keys WHERE `Field` = 'per_hour'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_keys` ADD  `per_hour` int(11)	 NOT NULL  AFTER  `last_used`";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+		$query="SHOW COLUMNS FROM #__api_logs WHERE `Field` = 'post_data'";
+		$db->setQuery($query);
+		$check=$db->loadResult();
+		if(!$check)
+		{
+			$query="ALTER TABLE  `#__api_logs` ADD  `post_data` TEXT NOT NULL ";
+			$db->setQuery($query);
+			if ( !$db->execute() ) {
+				JError::raiseError( 500, $db->stderr() );
+			}
+		}
+
+
+
 	}
 
 	/**
